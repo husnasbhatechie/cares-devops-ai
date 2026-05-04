@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>CARES DevOps Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body { background:#0f172a; color:white; text-align:center; }
+.box { width:80%; margin:auto; padding:20px; background:#1e293b; border-radius:10px; }
+canvas { max-height:300px; }
+button { padding:10px; margin:5px; border-radius:5px; cursor:pointer; }
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>🚀 DevOps Resilience Dashboard</h2>
+
+<form method="POST">
+<input name="temperature" placeholder="Temperature"><br><br>
+<input name="humidity" placeholder="Humidity"><br><br>
+<button type="submit">Analyze</button>
+</form>
+
+<hr>
+
+<!-- ✅ ONLY SHOW AFTER USER INPUT -->
+{% if temperature is not none %}
+
+<h3>🌡 {{ temperature }}</h3>
+<h3>💧 {{ humidity }}</h3>
+<h3>⚠ System Status: {{ status }}</h3>
+
+<h3>📊 MTTR: {{ mttr }}</h3>
+<h3>📉 Failure Rate: {{ failure_rate }}</h3>
+
+<h3>🤖 AI Decision: {{ decision }}</h3>
+<h3>📊 Model Accuracy: {{ accuracy }}</h3>
+
+{% endif %}
+
+<hr>
+
+<h3>🔥 Chaos Controls</h3>
+
+<button onclick="triggerChaos('sensor')">Sensor</button>
+<button onclick="triggerChaos('network')">Network</button>
+<button onclick="triggerChaos('drift')">Drift</button>
+<button onclick="triggerChaos('reset')">Self Heal</button>
+
+<p>⏱ Wait 3–5 seconds before clicking Self Heal to see MTTR</p>
+
+<hr>
+
+<h3>📊 IoT Graph</h3>
+<canvas id="chart"></canvas>
+
+<h3>📈 MTTR Graph</h3>
+<canvas id="mttrChart"></canvas>
+
+<h3>🧠 Confusion Matrix</h3>
+<canvas id="cmChart"></canvas>
+
+<hr>
+
+<a href="/download">
+<button>⬇ Download Logs</button>
+</a>
+
+</div>
+
+<script>
+
+let chart;
+let dataLog = [];
+
+function addData(temp, hum) {
+
+    let time = new Date().toLocaleTimeString();
+
+    dataLog.push({
+        time: time,
+        temp: temp,
+        hum: hum
+    });
+
+    if(dataLog.length > 10){
+        dataLog.shift(); // keep last 10 points
+    }
+
+    let labels = dataLog.map(x => x.time);
+    let temps = dataLog.map(x => x.temp);
+    let hums = dataLog.map(x => x.hum);
+
+    if(!chart){
+        chart = new Chart(document.getElementById("chart"), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: "Temperature", data: temps, borderColor: "red" },
+                    { label: "Humidity", data: hums, borderColor: "blue" }
+                ]
+            }
+        });
+    } else {
+        chart.data.labels = labels;
+        chart.data.datasets[0].data = temps;
+        chart.data.datasets[1].data = hums;
+        chart.update();
+    }
+}
+
+// 🔥 simulate live streaming
+setInterval(() => {
+    let temp = {{ temperature if temperature else 25 }};
+    let hum = {{ humidity if humidity else 50 }};
+
+    temp += (Math.random()*4 - 2);
+    hum += (Math.random()*6 - 3);
+
+    addData(temp, hum);
+
+}, 3000);
+
+</script>
+
+</body>
+</html>
