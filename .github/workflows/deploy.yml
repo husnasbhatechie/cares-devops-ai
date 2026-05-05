@@ -1,3 +1,4 @@
+
 name: CARES Pipeline
 
 on:
@@ -19,9 +20,9 @@ steps:
     with:
       python-version: '3.10'
 
-  - name: Install
+  - name: Install Dependencies
     run: pip install flask scikit-learn numpy
 
-  - name: Test
+  - name: Test App
     run: python -m py_compile app.py
 ```
